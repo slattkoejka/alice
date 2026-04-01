@@ -1,18 +1,17 @@
 #!/bin/bash
-
 export PORT=5000
 unset PIP_USER
 
-# Создать виртуальное окружение, если его нет
+# Создаём venv, если его нет
 if [ ! -d "venv" ]; then
     python3 -m venv venv
 fi
 
-# Активировать
+# Активируем venv
 source venv/bin/activate
 
 # Обновляем pip
-pip install --upgrade pip
+python -m pip install --upgrade pip
 
 # Устанавливаем зависимости
 pip install --no-cache-dir -r requirements.txt
