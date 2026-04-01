@@ -59,16 +59,20 @@ def handle_dialog(res, req):
 
     if sessionStorage[user_id]['first_name'] is None:
         first_name = get_first_name(req)
+
         if first_name is None:
+            first_name = req['request']['original_utterance']
+
+        if not first_name:
             res['response']['text'] = 'Не расслышала имя. Повтори, пожалуйста!'
-        else:
-            sessionStorage[user_id]['first_name'] = first_name
-            res['response'][
-                'text'] = f'Приятно познакомиться, {first_name.title()}. Я Алиса. Какой город хочешь увидеть?'
-            buttons = [{'title': city.title(), 'hide': True} for city in cities]
-            buttons.append({'title': 'Помощь', 'hide': False})
-            res['response']['buttons'] = buttons
-            last_response = deepcopy(res)
+            return
+        sessionStorage[user_id]['first_name'] = first_name
+        res['response'][
+            'text'] = f'Приятно познакомиться, {first_name.title()}. Я Алиса. Какой город хочешь увидеть?'
+        buttons = [{'title': city.title(), 'hide': True} for city in cities]
+        buttons.append({'title': 'Помощь', 'hide': False})
+        res['response']['buttons'] = buttons
+        last_response = deepcopy(res)
         return
 
     city = get_city(req)
