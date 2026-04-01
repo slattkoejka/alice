@@ -14,6 +14,9 @@ cities = {
 
 sessionStorage = {}
 
+@app.route('/', methods=['GET'])
+def health_check():
+    return '200'
 
 @app.route('/post', methods=['POST'])
 def main():
