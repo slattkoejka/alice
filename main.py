@@ -3,6 +3,7 @@ import logging
 from random import choice
 from waitress import serve
 import os
+from copy import deepcopy
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -16,6 +17,7 @@ cities = {
 sessionStorage = {}
 
 last_response = []
+
 
 @app.route('/')
 def health_check():
@@ -44,7 +46,7 @@ def handle_dialog(res, req):
         res['response']['text'] = 'Привет! Назови свое имя!'
         res['response']['buttons'] = [{'title': 'Помощь', 'hide': False}]  # кнопки пока пустые
         res['response']['end_session'] = False
-        last_response = res
+        last_response = deepcopy(res)
         return
 
     if req['request']['command'].lower() == 'помощь':
@@ -59,8 +61,9 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['first_name'] = first_name
             res['response'][
                 'text'] = f'Приятно познакомиться, {first_name.title()}. Я Алиса. Какой город хочешь увидеть?'
-            res['response']['buttons'] =  [{'title': city.title(), 'hide': True} for city in cities] + res['response']['buttons']
-            last_response = res
+            res['response']['buttons'] = [{'title': city.title(), 'hide': True} for city in cities] + res['response'][
+                'buttons']
+            last_response = deepcopy(res)
         return
 
     city = get_city(req)
@@ -74,7 +77,7 @@ def handle_dialog(res, req):
     else:
         res['response']['text'] = 'Первый раз слышу об этом городе. Попробуй еще разок!'
 
-    last_response = res
+    last_response = deepcopy(res)
 
 
 def get_city(req):
