@@ -49,9 +49,12 @@ def handle_dialog(res, req):
         last_response = deepcopy(res)
         return
 
-    if req['request']['command'].lower() == 'помощь':
+    command = req['request']['command'].lower()
+
+    if 'помощ' in command:
         res['response']['text'] = 'Это игра "Угадай город". Я загадываю, вы - угадываете!'
-        res['response']['buttons'] = last_response['response']['buttons'][:]
+        res['response']['buttons'] = [{'title': 'Помощь', 'hide': False}]
+        last_response = deepcopy(res)
         return
 
     if sessionStorage[user_id]['first_name'] is None:
@@ -62,8 +65,9 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['first_name'] = first_name
             res['response'][
                 'text'] = f'Приятно познакомиться, {first_name.title()}. Я Алиса. Какой город хочешь увидеть?'
-            res['response']['buttons'] = [{'title': city.title(), 'hide': True} for city in cities] + res['response'][
-                'buttons']
+            buttons = [{'title': city.title(), 'hide': True} for city in cities]
+            buttons.append({'title': 'Помощь', 'hide': False})
+            res['response']['buttons'] = buttons
             last_response = deepcopy(res)
         return
 
@@ -75,6 +79,7 @@ def handle_dialog(res, req):
             'image_id': choice(cities[city])
         }
         res['response']['text'] = 'Я угадал!'
+        res['response']['buttons'] = [{'title': 'Помощь', 'hide': False}]
     else:
         res['response']['text'] = 'Первый раз слышу об этом городе. Попробуй еще разок!'
 
