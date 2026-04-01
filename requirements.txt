@@ -1,1 +1,3 @@
-Flask==2.3.4
+flask
+requests
+waitress
