@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 import logging
 import random
+from waitress import serve
+import os
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -71,4 +73,5 @@ def get_first_name(req):
             return entity['value'].get('first_name', None)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get("PORT", 8000))
+    serve(app, host='0.0.0.0', port=port)
