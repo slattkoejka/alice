@@ -52,6 +52,7 @@ def handle_dialog(res, req):
     if req['request']['command'].lower() == 'помощь':
         res['response']['text'] = 'Это игра "Угадай город". Я загадываю, вы - угадываете!'
         res['response']['buttons'] = last_response['response']['buttons'][:]
+        return
 
     if sessionStorage[user_id]['first_name'] is None:
         first_name = get_first_name(req)
