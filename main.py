@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import logging
-import random
+from random import choice
 from waitress import serve
 import os
 
@@ -56,7 +56,7 @@ def handle_dialog(res, req):
         res['response']['card'] = {
             'type': 'BigImage',
             'title': 'Этот город я знаю.',
-            'image_id': cities[city][0]
+            'image_id': choice(cities[city])
         }
         res['response']['text'] = 'Я угадал!'
     else:
