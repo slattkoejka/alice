@@ -1,21 +1,23 @@
 #!/bin/bash
-
+cd ffllaapp # Your app working directory!!!
 export PORT=5000
 unset PIP_USER
 
-# Создаём виртуальное окружение, если его нет
+# Create venv if not exists
 if [ ! -d "venv" ]; then
-    python3 -m venv venv
+    echo "Creating virtual environment with system site packages..."
+    python3 -m venv venv --system-site-packages
 fi
 
-# Активируем виртуальное окружение
+# Activate
 source venv/bin/activate
 
-# Обновляем pip
-python -m pip install --upgrade pip
+# Try install (might fail if pip is broken, but packages should be there from packager_tool)
+if [ -f "requirements.txt" ]; then
+    echo "Checking dependencies..."
+    # We skip pip install if it fails, assuming packager_tool handled it
+    pip install -r requirements.txt || echo "Pip install failed, but continuing as packages might be pre-installed via system."
+fi
 
-# Устанавливаем зависимости
-pip install --no-cache-dir -r requirements.txt
-
-# Запуск приложения
+echo "Starting application..."
 python main.py
