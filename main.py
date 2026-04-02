@@ -99,10 +99,14 @@ def play_game(res, req):
         if country == countries[sessionStorage[user_id]['guessed_cities'][-1]]:
             res['response']['text'] = 'Верно! Сыграем еще?'
             res['response']['buttons'] = get_affirm_buttons()
+            sessionStorage[user_id]['guessed_countries'].append(
+                countries[sessionStorage[user_id]['guessed_cities'][-1]])
         else:
-            res['response']['text'] = f'Неверно, это {countries[sessionStorage[user_id]["guessed_cities"][-1]]} Сыграем еще?'
+            res['response'][
+                'text'] = f'Неверно, это {countries[sessionStorage[user_id]["guessed_cities"][-1]]} Сыграем еще?'
             res['response']['buttons'] = get_affirm_buttons()
-            sessionStorage[user_id]['guessed_countries'].append(countries[sessionStorage[user_id]['guessed_cities'][-1]])
+            sessionStorage[user_id]['guessed_countries'].append(
+                countries[sessionStorage[user_id]['guessed_cities'][-1]])
     elif attempt == 1:
         # если попытка первая, то случайным образом выбираем город для гадания
         city = choice(list(cities))
