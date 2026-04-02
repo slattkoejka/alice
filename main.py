@@ -100,7 +100,7 @@ def play_game(res, req):
             res['response']['text'] = 'Верно! Сыграем еще?'
             res['response']['buttons'] = get_affirm_buttons()
         else:
-            res['response']['text'] = f'Неверно, это {countries[sessionStorage[user_id]['guessed_cities'][-1]]} Сыграем еще?'
+            res['response']['text'] = f'Неверно, это {countries[sessionStorage[user_id]["guessed_cities"][-1]]} Сыграем еще?'
             res['response']['buttons'] = get_affirm_buttons()
             sessionStorage[user_id]['guessed_countries'].append(countries[sessionStorage[user_id]['guessed_cities'][-1]])
     elif attempt == 1:
