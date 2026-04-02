@@ -77,8 +77,10 @@ def handle_dialog(res, req):
                 res['end_session'] = True
             elif 'помощ' in req['request']['command']:
                 res['response']['text'] = 'Это игра "угадай город". Я загадываю, вы - отгадываете!'
+            elif req['request']['command'].lower() == 'покажи город на карте':
+                res['response']['text'] = 'Уже открываю карты!'
             else:
-                res['response']['text'] = 'Не поняла ответа! Так да или нет?'
+                res['response']['text'] = 'Не поняла ответа! Так сыграем или нет?'
                 res['response']['buttons'] = get_affirm_buttons()
         else:
             play_game(res, req)
