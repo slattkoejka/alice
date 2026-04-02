@@ -38,11 +38,15 @@ def main():
 
 def handle_dialog(res, req):
     user_id = req['session']['user_id']
+    if sessionStorage[user_id].get('awaiting_country'):
+        play_game(res, req)
+        return
     if req['session']['new']:
         res['response']['text'] = 'Привет! Назови своё имя!'
         sessionStorage[user_id] = {
-            'first_name': None,  # здесь будет храниться имя
-            'game_started': False  # здесь информация о том, что пользователь начал игру. По умолчанию False
+            'first_name': None,
+            'game_started': False,
+            'awaiting_country': False
         }
         return
 
@@ -94,19 +98,23 @@ def handle_dialog(res, req):
 def play_game(res, req):
     user_id = req['session']['user_id']
     attempt = sessionStorage[user_id]['attempt']
-    if len(sessionStorage[user_id]['guessed_countries']) < len(sessionStorage[user_id]['guessed_cities']):
+    if sessionStorage[user_id].get('awaiting_country'):
         country = req['request']['command']
         if country == countries[sessionStorage[user_id]['guessed_cities'][-1]]:
             res['response']['text'] = 'Верно! Сыграем еще?'
             res['response']['buttons'] = get_affirm_buttons()
             sessionStorage[user_id]['guessed_countries'].append(
                 countries[sessionStorage[user_id]['guessed_cities'][-1]])
+            sessionStorage[user_id]['awaiting_country'] = False
+            sessionStorage[user_id]['game_started'] = False
         else:
             res['response'][
                 'text'] = f'Неверно, это {countries[sessionStorage[user_id]["guessed_cities"][-1]]} Сыграем еще?'
             res['response']['buttons'] = get_affirm_buttons()
             sessionStorage[user_id]['guessed_countries'].append(
                 countries[sessionStorage[user_id]['guessed_cities'][-1]])
+            sessionStorage[user_id]['awaiting_country'] = False
+            sessionStorage[user_id]['game_started'] = False
     elif attempt == 1:
         # если попытка первая, то случайным образом выбираем город для гадания
         city = choice(list(cities))
@@ -129,9 +137,8 @@ def play_game(res, req):
             # если да, то добавляем город к sessionStorage[user_id]['guessed_cities'] и
             # отправляем пользователя на второй круг. Обратите внимание на этот шаг на схеме.
             res['response']['text'] = 'Правильно! А в какой он стране?'
-            # res['response']['buttons'] = get_affirm_buttons()
             sessionStorage[user_id]['guessed_cities'].append(city)
-            sessionStorage[user_id]['game_started'] = False
+            sessionStorage[user_id]['awaiting_country'] = True  # ← ВАЖНО
             return
         else:
             # если нет
