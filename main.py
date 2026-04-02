@@ -12,6 +12,12 @@ cities = {
     'париж': ["1652229/f77136c2364eb90a3ea8", '123494/aca7ed7acefd12e606bdc']
 }
 
+countries = {
+    'москва': 'россия',
+    'нью-йорк': 'сша',
+    'париж': 'франция'
+}
+
 sessionStorage = {}
 
 
@@ -48,6 +54,7 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['first_name'] = first_name
             # создаём пустой массив, в который будем записывать города, которые пользователь уже отгадал
             sessionStorage[user_id]['guessed_cities'] = []
+            sessionStorage[user_id]['guessed_countries'] = []
             # как видно из предыдущего навыка, сюда мы попали, потому что пользователь написал своем имя.
             # Предлагаем ему сыграть и два варианта ответа "Да" и "Нет".
             res['response']['text'] = f'Приятно познакомиться, {first_name.title()}. Я Алиса. Отгадаешь город по фото?'
@@ -77,9 +84,6 @@ def handle_dialog(res, req):
                 res['end_session'] = True
             elif 'помощ' in req['request']['command']:
                 res['response']['text'] = 'Это игра "угадай город". Я загадываю, вы - отгадываете!'
-            elif 'покажи' in req['request']['command']:
-                res['response']['text'] = 'Уже открываю карты! Еще загадывать?'
-                res['response']['buttons'] = get_affirm_buttons()
             else:
                 res['response']['text'] = 'Не поняла ответа! Так сыграем или нет?'
                 res['response']['buttons'] = get_affirm_buttons()
@@ -90,7 +94,16 @@ def handle_dialog(res, req):
 def play_game(res, req):
     user_id = req['session']['user_id']
     attempt = sessionStorage[user_id]['attempt']
-    if attempt == 1:
+    if len(sessionStorage[user_id]['guessed_countries']) < len(sessionStorage[user_id]['guessed_cities']):
+        country = req['request']['command']
+        if country == countries[sessionStorage[user_id]['guessed_cities'][-1]]:
+            res['response']['text'] = 'Верно! Сыграем еще?'
+            res['response']['buttons'] = get_affirm_buttons()
+        else:
+            res['response']['text'] = f'Неверно, это {countries[sessionStorage[user_id]['guessed_cities'][-1]]} Сыграем еще?'
+            res['response']['buttons'] = get_affirm_buttons()
+            sessionStorage[user_id]['guessed_countries'].append(countries[sessionStorage[user_id]['guessed_cities'][-1]])
+    elif attempt == 1:
         # если попытка первая, то случайным образом выбираем город для гадания
         city = choice(list(cities))
         # выбираем его до тех пор пока не выбираем город, которого нет в sessionStorage[user_id]['guessed_cities']
@@ -111,11 +124,8 @@ def play_game(res, req):
         if get_city(req) == city:
             # если да, то добавляем город к sessionStorage[user_id]['guessed_cities'] и
             # отправляем пользователя на второй круг. Обратите внимание на этот шаг на схеме.
-            res['response']['text'] = 'Правильно! Сыграем ещё?'
-            res['response']['buttons'] = get_affirm_buttons()
-            res['response']['buttons'].append({'title': 'Покажи город на карте',
-                                               'url': f'https://yandex.ru/maps/?mode=search&text={city}',
-                                               'hide': True})
+            res['response']['text'] = 'Правильно! А в какой он стране?'
+            # res['response']['buttons'] = get_affirm_buttons()
             sessionStorage[user_id]['guessed_cities'].append(city)
             sessionStorage[user_id]['game_started'] = False
             return
@@ -163,19 +173,19 @@ def get_first_name(req):
 
 def get_affirm_buttons():
     return [
-                {
-                    'title': 'Да',
-                    'hide': True
-                },
-                {
-                    'title': 'Нет',
-                    'hide': True
-                },
-                {
-                    'title': 'Помощь',
-                    'hide': False
-                }
-            ]
+        {
+            'title': 'Да',
+            'hide': True
+        },
+        {
+            'title': 'Нет',
+            'hide': True
+        },
+        {
+            'title': 'Помощь',
+            'hide': False
+        }
+    ]
 
 
 if __name__ == '__main__':
