@@ -38,9 +38,7 @@ def main():
 
 def handle_dialog(res, req):
     user_id = req['session']['user_id']
-    if sessionStorage[user_id].get('awaiting_country'):
-        play_game(res, req)
-        return
+
     if req['session']['new']:
         res['response']['text'] = 'Привет! Назови своё имя!'
         sessionStorage[user_id] = {
@@ -48,6 +46,10 @@ def handle_dialog(res, req):
             'game_started': False,
             'awaiting_country': False
         }
+        return
+
+    if sessionStorage[user_id].get('awaiting_country'):
+        play_game(res, req)
         return
 
     if sessionStorage[user_id]['first_name'] is None:
@@ -97,24 +99,22 @@ def handle_dialog(res, req):
 
 def play_game(res, req):
     user_id = req['session']['user_id']
-    attempt = sessionStorage[user_id]['attempt']
+    attempt = sessionStorage[user_id].get('attempt', 1)
     if sessionStorage[user_id].get('awaiting_country'):
-        country = req['request']['command']
-        if country == countries[sessionStorage[user_id]['guessed_cities'][-1]]:
+        country = req['request']['command'].lower()
+        correct_country = countries[sessionStorage[user_id]['guessed_cities'][-1]]
+
+        if correct_country in country:
             res['response']['text'] = 'Верно! Сыграем еще?'
             res['response']['buttons'] = get_affirm_buttons()
-            sessionStorage[user_id]['guessed_countries'].append(
-                countries[sessionStorage[user_id]['guessed_cities'][-1]])
-            sessionStorage[user_id]['awaiting_country'] = False
-            sessionStorage[user_id]['game_started'] = False
+            sessionStorage[user_id]['guessed_countries'].append(correct_country)
         else:
-            res['response'][
-                'text'] = f'Неверно, это {countries[sessionStorage[user_id]["guessed_cities"][-1]]} Сыграем еще?'
+            res['response']['text'] = f'Неверно, это {correct_country} Сыграем еще?'
             res['response']['buttons'] = get_affirm_buttons()
-            sessionStorage[user_id]['guessed_countries'].append(
-                countries[sessionStorage[user_id]['guessed_cities'][-1]])
-            sessionStorage[user_id]['awaiting_country'] = False
-            sessionStorage[user_id]['game_started'] = False
+            sessionStorage[user_id]['guessed_countries'].append(correct_country)
+
+        sessionStorage[user_id]['awaiting_country'] = False
+        sessionStorage[user_id]['game_started'] = False
     elif attempt == 1:
         # если попытка первая, то случайным образом выбираем город для гадания
         city = choice(list(cities))
